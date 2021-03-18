@@ -13,14 +13,3 @@ module.exports = client => {
   console.log(``);
 
 };
-                                        // Type kısımları:
-                                          // WATCHING - İZLİYOR
-                                          // PLAYING - OYNUYOR
-                                          // LISTENING - DİNLİYOR
-
-                                                                               // Status kısımları:
-                                                                                // online - çevrim içi
-                                                                                // idle - boşta
-                                                                                // dnd - rahatsız etmeyin
-
-                                                 // name kısmına oynuyorunuzu yazabilirsiniz.

@@ -1,68 +1,60 @@
 const Discord = require("discord.js");
-const db = require("quick.db")
-const bot = new Discord.Client();
-const a = require("../ayarlar.json");
+const db = require("quick.db");
+exports.run = async (client, message, args) => {
+  const kisi = db.fetch(`afkid_${message.author.id}_${message.guild.id}`);
+  if (kisi) return;
+  const sebep = args[0];
+  if (!args[0]) {
+    let kullanıcı = message.guild.members.cache.get(message.author.id);
+    const b = kullanıcı.displayName;
 
-module.exports.run = async (client, message, args) => {
-var kullanıcı = message.author;
-  var sebep = args.slice(0).join("  ");
-if(!sebep) return message.channel.send(new Discord.MessageEmbed()
-.setTitle(`<a:hydracrown3:816355855179841557> **__Uyarı__  /  __Warning!__** <a:hydracrown3:816355855179841557>`)
-.setDescription(`**[\`TR\`]**\n**AFK Moduna Geçmek İçin Bir Sebep Belirtmelisin!\n**[\`EN\`]**\nYou must provide a reason to switch to AFK Mode!**`))
-  .setFooter("HYDRA")
-  let dcs15 = new Discord.MessageEmbed()
-    .setTitle(`**⚠ Uyarı! / Warning!**`)
-    .setTimestamp()
-    .setFooter(client.user.username)
-    .setThumbnail(message.author.avatarURL)
-   .setDescription(`**[\`TR\`]**\n**AFK Moduna Girmek İçin Onay Veriyor musun?\n**[\`EN\`]**\nDo you confirm entering AFK Mode?**`)
-    .setFooter("HYDRA")
-    .setColor("RED")
-  message.channel.send(dcs15).then(sunucu => {
-    sunucu.react("✅").then(() => sunucu.react("❌"));      
+    await db.set(
+      `afkSebep_${message.author.id}_${message.guild.id}`,
+      "\`Sebep Girilmemiş\`"
+    );
+    await db.set(
+      `afkid_${message.author.id}_${message.guild.id}`,
+      message.author.id
+    );
+    await db.set(`afkAd_${message.author.id}_${message.guild.id}`, b);
 
-    let yesFilter = (reaction, user) =>
-      reaction.emoji.name === "✅" && user.id === message.author.id;
-    let noFilter = (reaction, user) =>
-      reaction.emoji.name === "❌" && user.id === message.author.id;
+    const a = await db.fetch(
+      `afkSebep_${message.author.id}_${message.guild.id}`
+    );
 
-    let yes = sunucu.createReactionCollector(yesFilter, { time: 0 });
-    let no = sunucu.createReactionCollector(noFilter, { time: 0 });
+    message.channel.send(`**<a:hydratac:789369824249643009> Başarıyla Afk Oldunuz Sebep:** \`${a}\``);
 
-    yes.on("collect", r => {
-      message.member.setNickname(`[ AFK ] ${message.member.displayName}`)
-      db.set(`afktag_${message.author.id}`, message.member.displayName)
-      let dcs16 = new Discord.MessageEmbed()
-        .setTitle(`✅ İşlem Başarılı! / ✅ Successful!`)
-        .setDescription(`**[\`TR\`]**\nAFK Moduna Girdiniz!\n**[\`EN\`]**\nYou Entered AFK Mode!`)
-        .setColor("GREEN")
-        .setThumbnail(client.user.avatarURL)
-        .setTimestamp()
-        .setThumbnail(message.guild.iconURL)
-      .setFooter("HYDRA")
-        .setFooter(message.guild.name);
-      message.channel.send(dcs16).then(x => {
+    message.member.setNickname(`[AFK] ` + b);
+  }
+  if (args[0]) {
+    let sebep = args.join(" ");
+    let kullanıcı = message.guild.members.cache.get(message.author.id);
+    const b = kullanıcı.displayName;
+    await db.set(`afkSebep_${message.author.id}_${message.guild.id}`, sebep);
+    await db.set(
+      `afkid_${message.author.id}_${message.guild.id}`,
+      message.author.id
+    );
+    await db.set(`afkAd_${message.author.id}_${message.guild.id}`, b);
+    const a = await db.fetch(
+      `afkSebep_${message.author.id}_${message.guild.id}`
+    );
 
-      
-      });
-    });
-    db.set(`afk_${kullanıcı.id}`, sebep);
-    db.set(`afk_süre_${kullanıcı.id}`, Date.now());
-    no.on("collect", r => {
-    db.delete(`afk_${kullanıcı.id}`, sebep);
-    db.delete(`afk_süre_${kullanıcı.id}`, Date.now());
-      
-      message.channel.send(`İptal Edildi!`)
-    });
-  });
-    };
-module.exports.conf = {
+    message.channel.send(`<a:hydratac:789369824249643009> **Başarıyla Afk Oldunuz** \n Sebep: \`${a}\``);
+
+    message.member.setNickname(`[AFK] ` + b);
+  }
+};
+
+exports.conf = {
   enabled: true,
   guildOnly: false,
   aliases: [],
   permLevel: 0
 };
 
-module.exports.help = {
-  name: "afk"
+exports.help = {
+  name: "afk",
+  description: "Afk Olmanızı Sağlar.",
+  usage: "afk / afk <sebep>"
 };
